@@ -3,18 +3,278 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Calculadora Financiera</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <link rel="stylesheet" href="/static/styles.css"/>
 </head>
 <body>
-    <h1>Welcome to the homepage</h1>
-    <h2>This is a test page</h2>
-    <form action="/sum" method="post">
-        <input type="number" name="num1" placeholder="Enter first number" required>
-        <input type="number" name="num2" placeholder="Enter second number" required>
-        <button type="submit">Sum</button>
-    </form>
-    {% if result is not none %}
-        <h1>Result: {{ result }}</h1>
-    {% endif %}
+    <div class="fondo">
+        <h1 class="titulo">Calculadora Financiera De Interes Simple</h1>
+        <div class='row'>
+            <div class='col-md-6'>
+                <div class="formBox-1">
+                    <form class="form" action="/VF" method="post">
+                        <h2>Valor Futuro</h2>
+                        <div class="form-group">
+                            <label>Ingrese VA:</label>
+                            <input type="text" placeholder='Ingresar VA' name="VA" class="form-control" required/>
+                        </div>
+                        <div class="form-group">
+                            <label>Ingrese i:</label>
+                            <input type="text" placeholder='Ingresar i' name="i" class="form-control" required/>
+                        </div>
+                        <div class="form-group">
+                            <label>Ingrese el tiempo del ejercicio:</label>
+                            <div id="selectTiempo">
+                                <div class="form-group mb-0">
+                                    <input type="text" placeholder='Ingresar tiempo' name="tiempo" class="form-control" id="selectTiempo" required/>
+                                </div>
+                                <div class="form-group mb-0">  
+                                    <select class="form-control" name="selectTiempo" id="selectTiempo" required>
+                                        <option value="opcion1">Años</option>
+                                        <option value="opcion2">Meses</option>
+                                        <option value="opcion3">Días</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" id="calcular">Calcular</button>
+                    </form>
+                    {% if result_vf is not none %}
+                        <div class="result-container">
+                            <h1>Resultado UM: {{ result_vf }}</h1>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class='col-md-6'>
+                <div class="formBox-2">
+                    <form class="form" action="/VA" method="post">
+                        <h2>Valor Actual</h2>
+                        <div class="form-group">
+                            <label>Ingrese VF:</label>
+                            <input type="text" placeholder='Ingresar VF' name="VF" class="form-control" required/>
+                        </div>
+                        <div class="form-group">
+                            <label for="TNA">Ingrese TNA:</label>
+                            <div class="input-group">
+                                <input type="text" placeholder="Ingresar TNA" name="TNA" class="form-control" required>
+                                <div class="input-group-append">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Ingrese el tiempo del ejercicio:</label>
+                            <div id="selectTiempo">
+                                <div class="form-group mb-0">
+                                    <input type="text" placeholder='Ingresar tiempo' name="tiempo" class="form-control" id="selectTiempo" required/>
+                                </div>
+                                <div class="form-group mb-0">  
+                                    <select class="form-control" name="selectTiempo" id="selectTiempo" required>
+                                        <option value="opcion1">Años</option>
+                                        <option value="opcion2">Meses</option>
+                                        <option value="opcion3">Días</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" id="calcular">Calcular</button>
+                        {% if result_va is not none %}
+                            <div class="result-container">
+                                <h1>Resultado UM: {{ result_va }}</h1>
+                            </div>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class='row'>
+            <div class='col-md-6'>
+                <div class="formBox-3">
+                    <form class="form" action="/TNA" method="post">
+                        <h2>Tasa Interés TNA</h2>
+                        <div class="form-group">
+                            <label>Ingrese i:</label>
+                            <input type="text" placeholder='Ingresar i' name="i" class="form-control" required/>
+                        </div>
+                        <div class="form-group">
+                            <label>Ingrese VA:</label>
+                            <input type="text" placeholder='Ingresar VA' name="VA" class="form-control" required/>
+                        </div>
+                        <div class="form-group">
+                            <label>Ingrese el tiempo del ejercicio:</label>
+                            <div id="selectTiempo">
+                                <div class="form-group mb-0">
+                                    <input type="text" placeholder='Ingresar tiempo' name="tiempo" class="form-control" id="selectTiempo" required/>
+                                </div>
+                                <div class="form-group mb-0">  
+                                    <select class="form-control" name="selectTiempo" id="selectTiempo" required>
+                                        <option value="opcion1">Años</option>
+                                        <option value="opcion2">Meses</option>
+                                        <option value="opcion3">Días</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" id="calcular">Calcular</button>
+                        {% if result_tna is not none %}
+                            <div class="result-container">
+                                <h1>Resultado: {{ result_tna }}%</h1>
+                            </div>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+            <div class='col-md-6'>
+                <div class="formBox-4">
+                    <form class="form" action="/tiempo" method="post">
+                        <h2>Cálculo de Tiempo</h2>
+                        <div class="form-group">
+                            <label>Ingrese i:</label>
+                            <input type="text" placeholder='Ingresar i' name="i" class="form-control" required/>
+                        </div>
+                        <div class="form-group">
+                            <label>Ingrese VA:</label>
+                            <input type="text" placeholder='Ingresar VA' name="VA" class="form-control" required/>
+                        </div>
+                        <div class="form-group">
+                            <label for="TNA">Ingrese TNA:</label>
+                            <div class="input-group">
+                                <input type="text" placeholder="Ingresar TNA" name="Ingrese TNA" class="form-control" required>
+                                <div class="input-group-append">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" id="calcular">Calcular</button>
+                        {% if years is not none and months is not none and days is not none %}
+                            <div class="result-container">
+                                <h4>Resultado:</h4>
+                                <div class="form-group form-group-inline">
+                                    <div class="form-group mb-0">
+                                        <label for="years" class="mr-2">Años:</label>
+                                        <input type="text" id="years" class="form-control" value="{{ years }}" readonly>
+                                    </div>
+                                    <div class="form-group mb-0">
+                                        <label for="months" class="mr-2">Meses:</label>
+                                        <input type="text" id="months" class="form-control" value="{{ months }}" readonly>
+                                    </div>
+                                    <div class="form-group mb-0">
+                                        <label for="days" class="mr-2">Días:</label>
+                                        <input type="text" id="days" class="form-control" value="{{ days }}" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class='row'>
+            <div class='col-md-6'>
+                <div class="formBox-5">
+                    <form class="form" action="/CI" method="post">
+                        <h2>Cálculo de Interés</h2>
+                        <div class="form-group">
+                            <label>Ingrese VA:</label>
+                            <input type="text" placeholder='Ingresar VA' name="VA" class="form-control" required/>
+                        </div>
+                        <div class="form-group">
+                            <label for="TNA">Ingrese TNA:</label>
+                            <div class="input-group">
+                                <input type="text" placeholder="Ingresar TNA" name="TNA" class="form-control" required>
+                                <div class="input-group-append">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Ingrese el tiempo del ejercicio:</label>
+                            <div id="selectTiempo">
+                                <div class="form-group mb-0">
+                                    <input type="text" placeholder='Ingresar tiempo' name="tiempo" class="form-control" id="selectTiempo" required/>
+                                </div>
+                                <div class="form-group mb-0">  
+                                    <select class="form-control" name="selectTiempo" id="selectTiempo" required>
+                                        <option value="opcion1">Años</option>
+                                        <option value="opcion2">Meses</option>
+                                        <option value="opcion3">Días</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" id="calcular">Calcular</button>
+                    </form>
+                    {% if result_ci is not none %}
+                        <div class="result-container">
+                            <h1>Resultado UM: {{ result_ci }}</h1>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class='col-md-6'>
+                <div class="formBox-6">
+                    <form class="form" action="/TEA" method="post">
+                        <h2>TEA</h2>
+                        <div class="form-group">
+                            <label for="TNA">Ingrese TNA:</label>
+                            <div class="input-group">
+                                <input type="text" placeholder="Ingresar TNA" name="TNA" class="form-control" required>
+                                <div class="input-group-append">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="ISR">Ingrese ISR:</label>
+                            <div class="input-group">
+                                <input type="text" placeholder="Ingresar ISR" name="ISR" class="form-control" required>
+                                <div class="input-group-append">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" id="calcular">Calcular</button>
+                        {% if result_tea is not none %}
+                            <div class="result-container">
+                                <h1>Resultado UM: {{ result_tea }}</h1>
+                            </div>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+        <input type="checkbox" id="toggle">
+    <label for="toggle" class="ver_for"></label>
+    <div class="info-box-container">
+        <div class="info-box">
+            <h3>Fórmula 1</h3>
+            <div class="info-box-content">
+                <p>Valor futuro VF=VA×(1+i×t)</p>
+            </div>
+        </div>
+        <div class="info-box">
+            <h3>Fórmula 2</h3>
+            <div class="info-box-content">
+                <p>Esta es la descripción o información detallada de la fórmula 2.</p>
+            </div>
+        </div>
+        <div class="info-box" id="info-box-3">
+            <h3>Fórmula 3</h3>
+            <div class="info-box-content">
+                <p>Esta es la descripción o información detallada de la fórmula 3.</p>
+            </div>
+        </div>
+    </div>
+    <footer class="footer">
+        <ul id="contacto">
+            <li>
+                <img id="icono-footer" class="linkedin" src="../images/uisil-logo.png" alt="Mi Icono" />
+            </li>
+        </ul>
+        <h6 class="design-by"> © 2024 Diseñado y Desarrollado por Cristian Alvarez Zuñiga. Todos los derechos reservados.
+        </h6>
+    </footer>
 </body>
 </html>
