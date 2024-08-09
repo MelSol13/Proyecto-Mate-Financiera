@@ -1,7 +1,7 @@
-from flask import Flask, send_from_directory, render_template, request, session, redirect, url_for
+from flask import Flask, jsonify, request, session, redirect, url_for, render_template, send_from_directory
 
 app = Flask("proyecto-mate-financiera")
-app.secret_key = 'supersecretkey'  # Necesario para usar sesiones
+app.secret_key = 'supersecretkey'
 
 @app.route('/images/<path:filename>')
 def images(filename):
@@ -9,16 +9,6 @@ def images(filename):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    # Inicializar variables de resultado
-    result_vf = None
-    result_va = None
-    result_tna = None
-    years = None
-    months = None
-    days = None
-    result_ci = None
-    result_tea = None
-
     if 'mostrar_formulas' not in session:
         session['mostrar_formulas'] = False
 
@@ -26,38 +16,37 @@ def index():
         session['mostrar_formulas'] = not session['mostrar_formulas']
         return redirect(url_for('index') + '#info-boxes')
 
-    return render_template('index.html', mostrar_formulas=session['mostrar_formulas'], 
-    result_vf=result_vf, result_va=result_va, result_tna=result_tna,years=years, months=months,
-    days=days, result_ci=result_ci, result_tea=result_tea)
+    return render_template('index.html', mostrar_formulas=session['mostrar_formulas'])
 
-# Rutas de cálculo (mantenerlas tal cual)
 @app.route('/VF', methods=['POST'])
 def VF():
     try:
-        VA = float(request.form['VA']) 
-        i = float(request.form['i'])     
-        tiempo = int(request.form['tiempo']) 
-        selectTiempo = request.form['selectTiempo']  
+        VA = float(request.form['VA'])
+        i = float(request.form['i']) / 100
+        tiempo = float(request.form['tiempo'])
+        selectTiempo = request.form['selectTiempo']
 
         if selectTiempo == 'opcion1':
             result_vf = VA * (1 + i * tiempo)
         elif selectTiempo == 'opcion2':
             result_vf = VA * (1 + (i / 12) * tiempo)
         elif selectTiempo == 'opcion3':
-            result_vf = VA * (1 + (i / 365) * tiempo)
+            result_vf = VA * (1 + (i / 360) * tiempo)
         else:
-            return "Error: Unidad de tiempo no reconocida."
+            return jsonify({"error": "Unidad de tiempo no reconocida."})
 
-        return render_template('index.html', result_vf=result_vf, mostrar_formulas=session['mostrar_formulas'])
+        result_vf_formatted = "{:,.2f}".format(result_vf)
+        return jsonify({"result_vf": result_vf_formatted})
     except ValueError:
-        return "Error: Asegúrate de que todos los campos sean válidos y numéricos."
+        return jsonify({"error": "Asegúrate de que todos los campos sean válidos y numéricos."})
 
 @app.route('/VA', methods=['POST'])
 def VA():
     try:
         VF = float(request.form['VF'])
-        TNA = float(request.form['TNA'])
-        tiempo = int(request.form['tiempo'])
+        I = float(request.form['I'])
+        TNA = float(request.form['TNA']) / 100
+        tiempo = float(request.form['tiempo'])
         selectTiempo = request.form['selectTiempo']
 
         if selectTiempo == 'opcion1':
@@ -65,72 +54,85 @@ def VA():
         elif selectTiempo == 'opcion2':
             result_va = VF / (1 + (TNA / 12) * tiempo)
         elif selectTiempo == 'opcion3':
-            result_va = VF / (1 + (TNA / 365) * tiempo)
+            result_va = VF / (1 + (TNA / 360) * tiempo)
         else:
-            return "Error: Unidad de tiempo no reconocida."
+            return jsonify({"error": "Unidad de tiempo no reconocida."})
 
-        return render_template('index.html', result_va=result_va, mostrar_formulas=session['mostrar_formulas'])
+        result_va_formatted = "{:,.2f}".format(result_va)
+        return jsonify({"result_va": result_va_formatted})
     except ValueError:
-        return "Error: Asegúrate de que todos los campos sean válidos y numéricos."
+        return jsonify({"error": "Asegúrate de que todos los campos sean válidos y numéricos."})
 
 @app.route('/TNA', methods=['POST'])
 def TNA():
     try:
-        i = float(request.form['i'])
+        I = float(request.form['I'])
         VA = float(request.form['VA'])
-        tiempo = int(request.form['tiempo'])
+        tiempo = float(request.form['tiempo'])
         selectTiempo = request.form['selectTiempo']
 
         if selectTiempo == 'opcion1':
-            result_tna = (i / (VA * tiempo))
+            result_tna = (I / (VA * tiempo)) * 100
         elif selectTiempo == 'opcion2':
-            result_tna = (i / (VA * (tiempo / 12)))
+            result_tna = (I / (VA * (tiempo / 12))) * 100
         elif selectTiempo == 'opcion3':
-            result_tna = (i / (VA * (tiempo / 365)))
+            result_tna = (I / (VA * (tiempo / 360))) * 100
         else:
-            return "Error: Unidad de tiempo no reconocida."
+            return jsonify({"error": "Unidad de tiempo no reconocida."})
 
-        return render_template('index.html', result_tna=result_tna, mostrar_formulas=session['mostrar_formulas'])
+        result_tna_formatted = "{:,.2f}".format(result_tna)
+        return jsonify({"result_tna": result_tna_formatted})
     except ValueError:
-        return "Error: Asegúrate de que todos los campos sean válidos y numéricos."
+        return jsonify({"error": "Asegúrate de que todos los campos sean válidos y numéricos."})
 
 @app.route('/tiempo', methods=['POST'])
 def calcular_tiempo():
     try:
         i = float(request.form['i'])
         VA = float(request.form['VA'])
-        TNA = float(request.form['TNA'])
+        TNA = float(request.form['TNA']) / 100
+        result = i / (VA * TNA)
+        
+        years = int(result)
+        months = int((result - years) * 12)
+        days = int((result - years - (months / 12)) * 365)
 
-        years = int(i / 365)
-        months = int((i % 365) / 30)
-        days = int(i % 30)
-
-        return render_template('index.html', years=years, months=months, days=days, mostrar_formulas=session['mostrar_formulas'])
+        return jsonify({"years": years, "months": months, "days": days})
     except ValueError:
-        return "Error: Asegúrate de que todos los campos sean válidos y numéricos."
+        return jsonify({"error": "Asegúrate de que todos los campos sean válidos y numéricos."})
 
 @app.route('/CI', methods=['POST'])
 def CI():
     try:
         VA = float(request.form['VA'])
-        TNA = float(request.form['TNA'])
+        i = float(request.form['i']) / 100
+        tiempo = float(request.form['tiempo'])
         selectTiempo = request.form['selectTiempo']
-        result_ci = 0  # Placeholder para tu lógica de CI
 
-        return render_template('index.html', result_ci=result_ci, mostrar_formulas=session['mostrar_formulas'])
+        if selectTiempo == 'opcion1':
+            result_ci = ( VA * i * tiempo )
+        elif selectTiempo == 'opcion2':
+            result_ci = VA * i * tiempo
+        elif selectTiempo == 'opcion3':
+            result_ci = VA * i * tiempo
+        else:
+            return jsonify({"error": "Unidad de tiempo no reconocida."})
+
+        result_ci_formatted = "{:,.2f}".format(result_ci)
+        return jsonify({"result_ci": result_ci_formatted})
     except ValueError:
-        return "Error: Asegúrate de que todos los campos sean válidos y numéricos."
+        return jsonify({"error": "Asegúrate de que todos los campos sean válidos y numéricos."})
 
 @app.route('/TEA', methods=['POST'])
 def TEA():
     try:
-        TNA = float(request.form['TNA'])
-        ISR = float(request.form['ISR'])
-        result_tea = 0  # Placeholder para tu lógica de TEA
+        TNA = float(request.form['TNA']) / 100
+        ISR = float(request.form['ISR']) / 100
+        result_tea = TNA * (1 - ISR) * 100
 
-        return render_template('index.html', result_tea=result_tea, mostrar_formulas=session['mostrar_formulas'])
+        return jsonify({"result_tea": result_tea})
     except ValueError:
-        return "Error: Asegúrate de que todos los campos sean válidos y numéricos."
+        return jsonify({"error": "Asegúrate de que todos los campos sean válidos y numéricos."})
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
