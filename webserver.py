@@ -39,29 +39,31 @@ def VF():
         return jsonify({"result_vf": result_vf_formatted})
     except ValueError:
         return jsonify({"error": "Asegúrate de que todos los campos sean válidos y numéricos."})
-
+    
+    
 @app.route('/VA', methods=['POST'])
 def VA():
     try:
         VF = float(request.form['VF'])
-        I = float(request.form['I'])
+        I = float(request.form['I'])   
         TNA = float(request.form['TNA']) / 100
-        tiempo = float(request.form['tiempo'])
+        tiempo = int(request.form['tiempo'])
         selectTiempo = request.form['selectTiempo']
 
         if selectTiempo == 'opcion1':
-            result_va = VF / (1 + TNA * tiempo)
+            result_va = VF / (1 + TNA * tiempo) or I / (TNA * tiempo)
         elif selectTiempo == 'opcion2':
-            result_va = VF / (1 + (TNA / 12) * tiempo)
+            result_va = VF / (1 + (TNA / 12) * tiempo) or I / (TNA/12 * tiempo)
         elif selectTiempo == 'opcion3':
-            result_va = VF / (1 + (TNA / 360) * tiempo)
+            result_va = VF / (1 + (TNA / 360) * tiempo) or I / (TNA/360 * tiempo)
         else:
             return jsonify({"error": "Unidad de tiempo no reconocida."})
-
+        
         result_va_formatted = "{:,.2f}".format(result_va)
         return jsonify({"result_va": result_va_formatted})
     except ValueError:
         return jsonify({"error": "Asegúrate de que todos los campos sean válidos y numéricos."})
+
 
 @app.route('/TNA', methods=['POST'])
 def TNA():
